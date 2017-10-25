@@ -69,5 +69,44 @@ endfor;
 
 disp(strcat("Processed",num2str(imageCount)," images"))
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Training
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Splitting classificatory values
+R = classification(:,1);
+G = classification(:,2);
+B = classification(:,3);
+CLASS = classification(:,4);
+
+%Normalizing classificatory values
+R_N = (R - mean(R)/std(R));
+G_N = (G - mean(G)/std(G));
+B_N = (R - mean(B)/std(B));
+
+data = [R_N G_N B_N];
+
+target = zeros(length(R),3);
+target(CLASS_SUNFLOWER, :) = repmat([1 0 0], sum(CLASS_SUNFLOWER),1);
+target(CLASS_ROSE, :) = repmat([0 1 0], sum(CLASS_ROSE),1);
+target(CLASS_IRIS, :) = repmat([0 0 1], sum(CLASS_IRIS),1);
+
+eta = 1;
+nHidden = 4;
+type= "sigmoid";
+epochCout = 1000;
+minErr = 0.001;
+[NET, errors] = backpropagation(data,target,nHidden,type,eta,epochCount,minErr);
+plot(errVec');
+
+% Display the graph
+figure
+hold_on
+scatter(plen(CLASS_SUNFLOWER),pwid(CLASS_SUNFLOWER),8,'k',"filled")
+scatter(plen(CLASS_ROSE),pwid(CLASS_ROSE),8,'r',"filled")
+scatter(plen(CLASS_IRIS),pwid(CLASS_IRIS),8,'g',"filled")
+title("RGB Variation")
 
 
