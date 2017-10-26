@@ -81,32 +81,45 @@ G = classification(:,2);
 B = classification(:,3);
 CLASS = classification(:,4);
 
+idx_sf = CLASS == CLASS_SUNFLOWER;
+idx_rs = CLASS == CLASS_ROSE;
+idx_ir = CLASS == CLASS_IRIS;
+
 %Normalizing classificatory values
 R_N = (R - mean(R)/std(R));
 G_N = (G - mean(G)/std(G));
 B_N = (R - mean(B)/std(B));
 
-data = [R_N G_N B_N];
-
+data = [R_N G_N];
+sum(CLASS_SUNFLOWER)
 target = zeros(length(R),3);
-target(CLASS_SUNFLOWER, :) = repmat([1 0 0], sum(CLASS_SUNFLOWER),1);
-target(CLASS_ROSE, :) = repmat([0 1 0], sum(CLASS_ROSE),1);
-target(CLASS_IRIS, :) = repmat([0 0 1], sum(CLASS_IRIS),1);
+target(idx_sf, :) = repmat([1 0 0], sum(idx_sf),1);
+target(idx_rs, :) = repmat([0 1 0], sum(idx_rs),1);
+target(idx_ir, :) = repmat([0 0 1], sum(idx_ir),1);
 
 eta = 1;
 nHidden = 4;
-type= "sigmoid";
-epochCout = 1000;
+epochCount = 1000;
 minErr = 0.001;
-[NET, errors] = backpropagation(data,target,nHidden,type,eta,epochCount,minErr);
-plot(errVec');
+[R_OUT, G_OUT, errVec] = backprop_sigmoid(data,target,nHidden,eta,epochCount,minErr);
+plot(errVec);
 
 % Display the graph
 figure
-hold_on
-scatter(plen(CLASS_SUNFLOWER),pwid(CLASS_SUNFLOWER),8,'k',"filled")
-scatter(plen(CLASS_ROSE),pwid(CLASS_ROSE),8,'r',"filled")
-scatter(plen(CLASS_IRIS),pwid(CLASS_IRIS),8,'g',"filled")
+hold on
+scatter(R(idx_sf),G(idx_sf),4,'k',"filled")
+scatter(R(idx_rs),G(idx_rs),4,'r',"filled")
+scatter(R(idx_ir),G(idx_ir),4,'g',"filled")
 title("RGB Variation")
 
+% Testing an image
+
+testImagePath = strcat(imagesDir,"sunflower_1.jpeg");
+testImage = imread(testImagePath);
+
+testAvgRgb = mean(reshape(testImage, size(testImage,1) * size(testImage,2), size(testImage,3)));
+testData = [ testAvgRgb(1) testAvgRgb(2) ];
+
+result = mlp_sigmoid(R_OUT, G_OUT, testData); %sunflower
+result
 
