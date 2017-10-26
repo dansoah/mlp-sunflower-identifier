@@ -90,19 +90,20 @@ R_N = (R - mean(R)/std(R));
 G_N = (G - mean(G)/std(G));
 B_N = (R - mean(B)/std(B));
 
-data = [R_N G_N];
+data = [R_N G_N B_N];
 sum(CLASS_SUNFLOWER)
 target = zeros(length(R),3);
 target(idx_sf, :) = repmat([1 0 0], sum(idx_sf),1);
 target(idx_rs, :) = repmat([0 1 0], sum(idx_rs),1);
 target(idx_ir, :) = repmat([0 0 1], sum(idx_ir),1);
 
-eta = 1;
-nHidden = 4;
-epochCount = 1000;
+eta = 0.0091;
+nHidden = 10;
+epochCount = 4000;
 minErr = 0.001;
-[R_OUT, G_OUT, errVec] = backprop_sigmoid(data,target,nHidden,eta,epochCount,minErr);
+[H_OUT, O_OUT, errVec] = backprop_sigmoid(data,target,nHidden,eta,epochCount,minErr);
 plot(errVec);
+title("Backpropagation")
 
 % Display the graph
 figure
@@ -112,14 +113,24 @@ scatter(R(idx_rs),G(idx_rs),4,'r',"filled")
 scatter(R(idx_ir),G(idx_ir),4,'g',"filled")
 title("RGB Variation")
 
-% Testing an image
+% Testing
 
 testImagePath = strcat(imagesDir,"sunflower_1.jpeg");
 testImage = imread(testImagePath);
 
 testAvgRgb = mean(reshape(testImage, size(testImage,1) * size(testImage,2), size(testImage,3)));
-testData = [ testAvgRgb(1) testAvgRgb(2) ];
+testData = [ testAvgRgb(1) testAvgRgb(2) testAvgRgb(3) ];
 
-result = mlp_sigmoid(R_OUT, G_OUT, testData); %sunflower
+result = mlp_sigmoid(H_OUT, O_OUT, testData);
 result
+if(result(1) > result(2) && result(1) > result(3))
+  disp("sunflower")
+endif;
 
+if(result(2) > result(1) && result(2) > result(3))
+  disp("rose")
+endif;
+ 
+if(result(3) > result(1) && result(3) > result(2))
+  disp("iris")
+endif;
